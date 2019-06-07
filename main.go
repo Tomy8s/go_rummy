@@ -15,8 +15,10 @@ type player struct {
 }
 
 type card struct {
-	suit	string
-	value	int
+	suit		string
+	value		int
+	ofAKind 	int
+	straight	int
 }
 
 var (
@@ -35,6 +37,11 @@ func main() {
 	fmt.Println("\nLets begin playing rummy.....")
 
 	deal(numberOfPlayers)
+
+	for _, player := range players {
+		checkHand(&player.cards)
+		printHand(player)
+	}
 
 	fmt.Println("\nPlayers' hands: ", players)
 }
@@ -86,4 +93,39 @@ func deal(numberOfPlayers int) {
 
 		players = append(players, player{name: name, cards: startingHand})
 	}
+}
+
+func checkHand(cards *[]card) {
+	hand := *cards
+	for i, card := range hand {
+		for j, card2 := range hand {
+			if i == j {
+				continue
+			}
+			if card2.suit == card.suit {
+				diff := card2.value - card.value
+				if diff < 5 && diff > -5 {
+					(*cards)[i].straight++
+				}
+			} else {
+				if card2.value == card.value {
+					(*cards)[i].ofAKind++
+				}
+			}
+		}
+	}
+}
+
+
+func printHand(player player) {
+	var hand string
+
+	for _, card := range player.cards {
+		hand += strconv.Itoa(card.value) + " of " + card.suit + ", "
+	}
+
+	hand = hand[:len(hand)-2] + "."
+
+	fmt.Println(player.name, " holds:")
+	fmt.Println(hand)
 }
